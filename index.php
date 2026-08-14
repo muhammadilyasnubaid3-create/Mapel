@@ -1,0 +1,67 @@
+<?php include 'koneksi.php'; ?>
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Todolist SMK</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5" style="max-width: 600px;">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0 text-center">📌 Todolist Saya</h4>
+        </div>
+        <div class="card-body">
+            
+            <!-- FORM INPUT TUGAS BARU -->
+            <form action="proses.php" method="POST" class="d-flex gap-2 mb-4">
+                <input type="text" name="task_name" class="form-control" placeholder="Ketik tugas baru di sini..." required>
+                <button type="submit" name="tambah" class="btn btn-primary">Tambah</button>
+            </form>
+
+            <!-- DAFTAR TUGAS -->
+            <ul class="list-group">
+                <?php
+                // Ambil semua data tugas dari database
+                $query = "SELECT * FROM tasks ORDER BY id DESC";
+                $result = mysqli_query($koneksi, $query);
+
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        $is_completed = $row['status'] == 'completed';
+                        ?>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <!-- Jika selesai, beri efek coret (text-decoration-line-through) -->
+                            <span class="<?= $is_completed ? 'text-decoration-line-through text-muted' : '' ?>">
+                                <?= htmlspecialchars($row['task_name']); ?>
+                            </span>
+
+                            <div>
+                                <!-- Tombol Selesai -->
+                                <?php if (!$is_completed): ?>
+                                    <a href="proses.php?selesai=<?= $row['id']; ?>" class="btn btn-sm btn-success">✓</a>
+                                <?php endif; ?>
+                                
+                                <!-- Tombol Hapus -->
+                                <a href="proses.php?hapus=<?= $row['id']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus?')">✕</a>
+                            </div>
+                        </li>
+                        <?php
+                    }
+                } else {
+                    echo '<li class="list-group-item text-center text-muted">Belum ada tugas hari ini.</li>';
+                }
+                ?>
+            </ul>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
